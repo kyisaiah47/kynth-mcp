@@ -1,0 +1,3 @@
+# Supabase PUBLISHABLE key (browser-safe by design; already served in the civicbinder.org bundle; RLS scopes reads)
+89513d286947cad1ee07f571497db550905fd7a5:src/server.js:generic-api-key:24
+src/server.js:generic-api-key:24
