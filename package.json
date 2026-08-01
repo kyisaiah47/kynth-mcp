@@ -1,6 +1,7 @@
 {
   "name": "kynth-mcp",
-  "version": "0.1.1",
+  "version": "0.1.2",
+  "mcpName": "studio.kynth/kynth-mcp",
   "description": "MCP server for Kynth Studios compliance lookups — ADA Title II website accessibility reports for US local-government domains (CivicBinder) and IRS/California good-standing checks for nonprofits (GoodStanding).",
   "type": "module",
   "license": "MIT",
