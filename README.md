@@ -1,6 +1,6 @@
 # kynth-mcp
 
-MCP server for [Kynth Studios](https://kynth.studio) compliance lookups. Two read-only tools backed by live public data — no API key, no signup.
+MCP server from [Kynth Studios](https://kynth.studio). Two read-only lookup tools backed by live public data — municipal web-accessibility reports and nonprofit IRS status — no API key, no signup.
 
 `mcp-name: studio.kynth/kynth-mcp`
 
