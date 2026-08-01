@@ -1,0 +1,17 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "studio.kynth/kynth-mcp",
+  "description": "ADA Title II accessibility reports for US .gov websites and nonprofit good-standing checks by EIN.",
+  "version": "0.1.1",
+  "websiteUrl": "https://github.com/kyisaiah47/kynth-mcp",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "kynth-mcp",
+      "version": "0.1.1",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
