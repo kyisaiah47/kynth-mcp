@@ -17,6 +17,7 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { registerDirectoryTools } from './directories.js';
 
 const CB_SITE = 'https://civicbinder.org';
 const SB_URL = 'https://xowekqdsttxwbhfxvusa.supabase.co';
@@ -131,11 +132,11 @@ async function lookupNonprofitStatus(rawEin) {
   };
 }
 
-/** Build the McpServer with both tools registered. One instance per connection. */
+/** Build the McpServer with every tool registered. One instance per connection. */
 export function buildServer() {
   const server = new McpServer({
     name: 'kynth-mcp',
-    version: '0.1.0',
+    version: '0.2.0',
   });
 
   server.registerTool(
@@ -189,6 +190,12 @@ export function buildServer() {
       };
     },
   );
+
+  // The seven directory lookups. The two tools above answer a compliance question someone
+  // already knew they had; these answer questions an agent hits mid-task and currently
+  // resolves from a training cutoff — which model costs what, whether a library is still
+  // maintained, whether a skill for this already exists.
+  registerDirectoryTools(server);
 
   return server;
 }

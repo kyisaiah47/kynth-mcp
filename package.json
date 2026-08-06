@@ -1,8 +1,8 @@
 {
   "name": "kynth-mcp",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "mcpName": "studio.kynth/kynth-mcp",
-  "description": "MCP server from Kynth Studios — ADA Title II website accessibility reports for US local-government domains (CivicBinder) and IRS/California good-standing checks for nonprofits (GoodStanding).",
+  "description": "MCP server from Kynth Studios — ten read-only lookups over live public data: agent skills and configs, shadcn component registries, AI model pricing and routing, dependency maintenance status, SaaS pricing and stack cost estimates, ADA Title II accessibility reports, and nonprofit good-standing checks. No key, no signup.",
   "type": "module",
   "license": "MIT",
   "author": "Kynth Studios <hello@kynth.studio>",
@@ -21,7 +21,15 @@
     "nonprofit",
     "ein",
     "compliance",
-    "govtech"
+    "govtech",
+    "skills",
+    "registry",
+    "shadcn",
+    "pricing",
+    "llm-pricing",
+    "model-comparison",
+    "directory",
+    "agent-tools"
   ],
   "bin": {
     "kynth-mcp": "bin/kynth-mcp.js"
