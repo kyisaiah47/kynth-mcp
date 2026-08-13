@@ -54,13 +54,53 @@ function normalizeDomain(input) {
   return d;
 }
 
+/** Every request gets a deadline. An `await fetch` with no `signal` never settles when the socket
+ *  dies — the MCP client then hangs with no error and the agent stalls mid-turn, which is the worst
+ *  possible failure for a tool an agent is waiting on. */
+const TIMEOUT_MS = Number(process.env.KYNTH_MCP_TIMEOUT_MS || 10_000);
+
 async function fetchJson(url, headers = {}) {
-  const res = await fetch(url, { headers });
+  const res = await fetch(url, { headers, signal: AbortSignal.timeout(TIMEOUT_MS) });
   if (!res.ok) {
     const body = (await res.text()).slice(0, 200);
     throw new Error(`upstream ${res.status}: ${body}`);
   }
   return res.json();
+}
+
+/** ⛔ NDJSON, NOT JSON. GoodStanding's /api/lookup streams progress and finishes with the answer:
+ *
+ *    content-type: application/x-ndjson; charset=utf-8
+ *    {"stage":"read","state":"running"}
+ *    {"stage":"read","state":"done","ms":0}
+ *    …
+ *    {"result":{"query":"…","clear":true,"results":[]}}
+ *
+ *  `res.json()` dies on line 2, so lookup_nonprofit_status returned an MCP protocol error —
+ *  "Unexpected non-whitespace character after JSON at position 35" — for EVERY input it has ever
+ *  received, including the default EIN in its own smoke test. Verified against the live endpoint
+ *  2026-08-13; the header above is copied from that response.
+ *
+ *  The answer is also NESTED under `result`, so reading `data.clear` off the parsed line would
+ *  report a clean nonprofit as delinquent — a worse bug than the crash, because it looks like an
+ *  answer. Both are handled here. */
+async function fetchNdjsonResult(url, headers = {}) {
+  const res = await fetch(url, { headers, signal: AbortSignal.timeout(TIMEOUT_MS) });
+  if (!res.ok) {
+    const body = (await res.text()).slice(0, 200);
+    throw new Error(`upstream ${res.status}: ${body}`);
+  }
+  const text = await res.text();
+  const lines = text.trim().split('\n').filter(Boolean);
+  for (let i = lines.length - 1; i >= 0; i--) {
+    try {
+      const obj = JSON.parse(lines[i]);
+      if (obj && Object.prototype.hasOwnProperty.call(obj, 'result')) return obj.result;
+    } catch {
+      /* a progress line that is not the terminal frame */
+    }
+  }
+  throw new Error('upstream returned no result frame');
 }
 
 async function lookupAdaReport(rawDomain) {
@@ -112,7 +152,7 @@ async function lookupNonprofitStatus(rawEin) {
   if (digits.length !== 9) {
     return { error: `"${rawEin}" is not a valid EIN. An EIN has 9 digits, e.g. 12-3456789.` };
   }
-  const data = await fetchJson(`${GS_API}?q=${digits}`);
+  const data = await fetchNdjsonResult(`${GS_API}?q=${digits}`);
   if (data.clear) {
     return {
       ein: digits,

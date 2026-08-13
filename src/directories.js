@@ -25,8 +25,19 @@ const API = {
 /** Cap on rows returned to a caller. Above this the answer stops being an answer. */
 const MAX_ROWS = 10;
 
+/** ⛔ EVERY REQUEST GETS A DEADLINE. An `await fetch` with no `signal` never settles when the
+ *  socket dies, and all eight directory tools sit behind this one call — so a single dead upstream
+ *  would hang the MCP client with no error and stall the agent mid-turn, which is the worst
+ *  failure available to a tool something is waiting on. Same class as the three shared libraries
+ *  this estate fixed on 2026-08-13. The rejection lands in the tool() wrapper below, which already
+ *  turns an upstream failure into a readable `{ error }` rather than a protocol error. */
+const TIMEOUT_MS = Number(process.env.KYNTH_MCP_TIMEOUT_MS || 10_000);
+
 async function get(url) {
-  const res = await fetch(url, { headers: { accept: 'application/json' } });
+  const res = await fetch(url, {
+    headers: { accept: 'application/json' },
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  });
   if (!res.ok) throw new Error(`upstream ${res.status} for ${url}`);
   return res.json();
 }
@@ -250,13 +261,18 @@ export function registerDirectoryTools(server) {
       const rows = d.tools || d.rows || d.dead || (Array.isArray(d) ? d : []);
       return {
         query: q || '(recently declared dead)',
+        /* ⛔ THESE KEYS DID NOT EXIST UPSTREAM, so JSON.stringify dropped them and the tool
+         * answered with less than its description promised. The row StillShipping actually
+         * serves (keys read off /api/tools on 2026-08-13) carries `verdict`, `pushed_at`,
+         * `homepage` and `repo_full_name` — not status / last_commit / url. So the field this
+         * tool exists for, the dead-or-alive VERDICT, was the one silently missing. */
         results: rows.slice(0, clamp(limit)).map((t) => ({
           name: t.name || t.slug,
-          status: t.status,
-          last_release: t.last_release || t.last_release_at,
-          last_commit: t.last_commit || t.last_commit_at,
+          status: t.verdict,
+          last_release: t.last_release_at,
+          last_commit: t.pushed_at,
           stars: t.stars,
-          url: t.url || t.repo_url,
+          url: t.homepage || (t.repo_full_name ? `https://github.com/${t.repo_full_name}` : null),
         })),
         browse: 'https://stillshipping.kynth.studio',
       };
@@ -279,17 +295,41 @@ export function registerDirectoryTools(server) {
       },
     },
     async ({ q, limit }) => {
-      const d = await get(`${API.kitgrade}/kits?${qs({ q, limit: clamp(limit) })}`);
-      const rows = d.kits || d.rows || (Array.isArray(d) ? d : []);
+      /* ⛔ KITGRADE'S LIST ENDPOINT IGNORES `q`. Verified 2026-08-13 with q, search, slug and
+       * name: all four return total 34 and the identical top five, so asking for "shipfast"
+       * answered with Bullet Train — a confidently wrong answer, which for an agent tool is worse
+       * than an empty one. The per-slug route does work (`/api/kits/shipfast` returns ShipFast),
+       * so a named request goes there first and falls back to the list when the slug is unknown. */
+      const slug = String(q || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      let rows = [];
+      if (slug) {
+        try {
+          const one = await get(`${API.kitgrade}/kits/${encodeURIComponent(slug)}`);
+          const kit = one.kit || one;
+          if (kit && (kit.slug || kit.name)) rows = [kit];
+        } catch {
+          /* unknown slug — fall through to the list, which is still a useful answer */
+        }
+      }
+      if (!rows.length) {
+        const d = await get(`${API.kitgrade}/kits?${qs({ q, limit: clamp(limit) })}`);
+        rows = d.kits || d.rows || (Array.isArray(d) ? d : []);
+      }
       return {
         query: q || '(top graded)',
+        /* ⛔ SAME CLASS: a tool named grade_starter_kit returned no grade. KitGrade's row (keys
+         * read off /api/kits on 2026-08-13) has `evidence_level`, `coverage`, `repo` and
+         * `homepage` — there is no `grade`, no `verified_features` and no `url`, so three of the
+         * six fields resolved to undefined and vanished. `evidence_level` is the real grade: it
+         * says whether the kit was installed and run or only read. */
         kits: rows.slice(0, clamp(limit)).map((k) => ({
           name: k.name || k.slug,
-          grade: k.grade,
+          grade: k.evidence_level,
           score: k.score,
           stack: k.stack,
-          verified: k.verified_features || k.features,
-          url: k.url || k.repo_url,
+          coverage: k.coverage,
+          price: k.price_label,
+          url: k.homepage || (k.repo ? `https://github.com/${k.repo}` : null),
         })),
         browse: 'https://kitgrade.kynth.studio',
       };
@@ -304,13 +344,19 @@ export function registerDirectoryTools(server) {
       title: 'Look up current published pricing for a SaaS service',
       description:
         'Read StackTab, which re-checks the published pricing of the services a product runs ' +
-        'on (auth, database, payments, email, hosting, analytics) and records when each plan ' +
+        /* Four categories, not six. StackTab's live catalogue (fetched 2026-08-13) serves 29
+         * services across auth, database, hosting and payments — there is no email category and
+         * no analytics category, so an agent asking for either got an empty result that reads as
+         * "this service has no pricing" rather than "we do not cover that". */
+        'on (auth, database, hosting, payments) and records when each plan ' +
         'was last verified against the vendor\'s own page. Use when asked what something costs ' +
         'or what its free tier includes. Prices and free-tier limits change often enough that a ' +
         'remembered figure is a guess; each plan here carries the date it was last checked.',
       inputSchema: {
-        category: z.string().optional().describe('Filter by category, e.g. "auth", "database", "payments", "email", "hosting".'),
-        service: z.string().optional().describe('A specific service slug or name, e.g. "clerk", "neon", "resend".'),
+        category: z.string().optional().describe('Filter by category: "auth", "database", "hosting" or "payments".'),
+        /* `resend` was the documented example and is not in the catalogue — the example a reader
+         * copies first has to be one that returns something. */
+        service: z.string().optional().describe('A specific service slug or name, e.g. "clerk", "neon", "stripe".'),
       },
     },
     async ({ category, service }) => {

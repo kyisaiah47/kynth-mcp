@@ -19,12 +19,19 @@ if (args.includes('--http')) {
   const app = express();
   app.use(express.json());
 
-  // Stateless mode: a fresh server + transport per request. Both tools are
-  // read-only lookups, so there is no session state worth keeping.
+  // Stateless mode: a fresh server + transport per request. Every tool is a read-only lookup, so
+  // there is no session state worth keeping. (Said "Both tools" while ten shipped.)
   app.post('/mcp', async (req, res) => {
     try {
       const server = buildServer();
-      const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+      /* ⛔ DNS-REBINDING PROTECTION. Without it any page in the user's browser can POST to this
+       * local server and drive it: measured 2026-08-13, a request carrying
+       * `Origin: https://evil.example.com` returned HTTP 200 and a valid initialize result. */
+      const transport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: undefined,
+        enableDnsRebindingProtection: true,
+        allowedHosts: ['127.0.0.1', 'localhost', `127.0.0.1:${port}`, `localhost:${port}`],
+      });
       res.on('close', () => {
         transport.close();
         server.close();
@@ -53,8 +60,11 @@ if (args.includes('--http')) {
   app.get('/mcp', reject);
   app.delete('/mcp', reject);
 
-  app.listen(port, () => {
-    console.error(`kynth-mcp listening on http://localhost:${port}/mcp (streamable HTTP, stateless)`);
+  /* ⛔ LOOPBACK ONLY. `app.listen(port)` binds 0.0.0.0 — confirmed with lsof on 2026-08-13,
+   * `TCP *:8974 (LISTEN)` — so this local dev server was reachable from every device on the
+   * network. Nothing about an MCP server for one user's agent wants that. */
+  app.listen(port, '127.0.0.1', () => {
+    console.error(`kynth-mcp listening on http://127.0.0.1:${port}/mcp (streamable HTTP, stateless, loopback only)`);
   });
 } else {
   const { StdioServerTransport } = await import('@modelcontextprotocol/sdk/server/stdio.js');
