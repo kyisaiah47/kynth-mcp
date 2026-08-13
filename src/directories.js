@@ -220,10 +220,23 @@ export function registerDirectoryTools(server) {
       const boards = d.boards || [];
       const picked = boards.find((b) => `${b.scope}/${b.scope_key}`.toLowerCase() === want) || boards[0];
       if (!picked) return { error: 'leaderboard returned no boards', browse: 'https://tooldrift.kynth.studio' };
+      /* ⛔ THE WHOLE METHOD DOCUMENT WAS RETURNED ON EVERY CALL. Measured live 2026-08-13:
+       * `d.method` is a 1,324-byte constant — seven prose fields including the full weighting
+       * formula and the per-tool board list — and it was spent on every single invocation of this
+       * tool, whatever board was asked for.
+       *
+       * The two sentences that MUST survive are the two an agent gets wrong without them: this
+       * ranks ADOPTION, and it does not measure capability. "Ranked #1" read without those is a
+       * far stronger claim than the data supports, which is the same reason `rationale` travels
+       * on every row below. Everything else is a document, and a document belongs behind a URL. */
+      const m = d.method || null;
       return {
         board: `${picked.scope}/${picked.scope_key}`,
         captured_on: d.captured_on ?? null,
-        method: d.method ?? null,
+        method_summary: m
+          ? `Ranks ${m.measures}. Does not measure ${m.does_not_measure} ${m.price_basis}`
+          : null,
+        method_url: 'https://tooldrift.kynth.studio/method',
         available_boards: boards.map((b) => `${b.scope}/${b.scope_key}`),
         models: (picked.rows || []).slice(0, clamp(limit)).map((m) => ({
           rank: m.rank,
@@ -412,11 +425,35 @@ export function registerDirectoryTools(server) {
       const d = await get(`${API.stacktab}/estimate?${qs({ stack, users })}`);
       if (d.error) return { error: d.error, browse: 'https://stacktab.kynth.studio' };
       const picks = d.at?.picks || [];
+      /* ⛔ THIS RECOMPUTED A TOTAL THE API HAD DELIBERATELY REFUSED TO GIVE.
+       *
+       * StackTab's own estimator (src/lib/estimate.ts:362-364) is explicit:
+       *
+       *     const unpriced = picks.filter((e) => e.total === null).map((e) => e.serviceName);
+       *     const total = unpriced.length ? null : round(picks.reduce(...));
+       *
+       * A service whose every plan is blocked at this usage comes back with `total: null`, and the
+       * stack total is then `null` ON PURPOSE — a bill missing one of its lines is not a smaller
+       * bill, it is not a bill. StackTab's own UI says so out loud: "No total: X publishes no rate
+       * at this usage."
+       *
+       * This handler ignored `d.at.total` and summed the picks itself with `p.total || 0`, which
+       * turns that deliberate null into a ZERO. The unpriced service silently contributed nothing
+       * and the agent received a confident number that was too low, with no field anywhere in the
+       * response hinting a line was missing — `unpriced` was dropped entirely.
+       *
+       * ⚠️ TODAY'S CATALOGUE DOES NOT TRIGGER IT. Checked live 2026-08-13 across several stacks up
+       * to 100M users: every pick priced, `unpriced` empty, so the two numbers agree and the bug
+       * is invisible. That is what makes it worth fixing now rather than when someone notices —
+       * it is one capped plan away from shipping a wrong bill, and nothing would fail. */
       return {
         stack: d.stack,
         unknown_services: d.unknown_services,
         users: d.at?.users,
-        monthly_total_usd: picks.reduce((n, p) => n + (p.total || 0), 0),
+        monthly_total_usd: d.at?.total ?? null,
+        // Present and empty on a clean estimate; naming the services is the whole point when it
+        // is not, because `monthly_total_usd: null` on its own does not say which line is missing.
+        unpriced_services: d.at?.unpriced ?? [],
         services: picks.map((p) => ({
           service: p.serviceName || p.service,
           plan: p.planName || p.plan,
