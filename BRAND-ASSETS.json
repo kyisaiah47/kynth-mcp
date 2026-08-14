@@ -1,0 +1,41 @@
+{
+ "product": "kynth-mcp",
+ "slug": "kynth-mcp",
+ "_note": "Created by W13 (kynth-ops/social/tools/_tokens.cjs --assign) because this product had no brand record. Only `cardTokens` below is authoritative; fill the rest in as the product gets art-directed.",
+ "cardTokens": {
+  "_note": "W13 card tokens — what the social/portfolio card renderers vary per product. Widened past accent-hue on 2026-08-13; see kynth-ops/social/tools/_tokens.cjs. The renderers read these values first, so editing any line art-directs this product immediately. ⚠️ Re-running `node _tokens.cjs --assign` RE-BASELINES every product and will overwrite hand edits here — art-direct a product by editing this block and then leaving --assign alone.",
+  "scheme": "light",
+  "accent": "#8a1625",
+  "ground": {
+   "tone": {
+    "tint": 0.6,
+    "lift": 0
+   },
+   "family": "rule",
+   "base": "#c48890",
+   "panel": "#b98188"
+  },
+  "ink": "#16161a",
+  "dim": "#4f4044",
+  "hairline": "rgba(22,22,26,0.14)",
+  "type": {
+   "pairing": "editorial/plexmono"
+  },
+  "grid": {
+   "density": "tight"
+  },
+  "corner": {
+   "style": "round"
+  },
+  "mark": {
+   "placement": "br"
+  },
+  "figure": {
+   "scale": "hero",
+   "bleed": false
+  },
+  "window": {
+   "theme": "catppuccin-latte"
+  }
+ }
+}
