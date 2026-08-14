@@ -1,6 +1,6 @@
 {
   "author": "Kynth Studios",
-  "description": "MCP server from Kynth Studios — ten read-only lookups over live public data: agent skills and configs, shadcn component registries, AI model pricing and routing, dependency maintenance status, SaaS pricing and stack cost estimates, ADA Title II accessibility reports, and nonprofit good-standing checks. No key, no signup.",
+  "description": "MCP server from Kynth Studios — eleven read-only lookups over live public data: agent skills and configs, shadcn component registries, AI model pricing and routing, dependency maintenance status, SaaS pricing and stack cost estimates, AI app-builder App Store readiness, ADA Title II accessibility reports, and nonprofit good-standing checks. No key, no signup.",
   "homepage": "https://kynth.studio",
   "identifier": "kyisaiah47-kynth-mcp",
   "name": "kynth-mcp",
@@ -20,7 +20,10 @@
     "saas-pricing",
     "accessibility",
     "wcag",
-    "nonprofit"
+    "nonprofit",
+    "app-store",
+    "ios",
+    "app-builders"
   ],
   "tools": [
     {
@@ -281,5 +284,5 @@
       }
     }
   ],
-  "version": "0.2.1"
+  "version": "0.3.0"
 }

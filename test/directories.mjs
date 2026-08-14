@@ -121,6 +121,33 @@ const CASES = [
       required: ['stack', 'users', 'unpriced_services'],
     },
   },
+  {
+    name: 'compare_app_builders',
+    args: { limit: 3 },
+    rows: (r) => r.builders,
+    // `verdict` and `why` are the entire product. A row carrying a verdict with no sourced
+    // reasoning is exactly the confident guess this catalogue exists to replace.
+    required: ['builder', 'slug', 'verdict', 'why', 'output', 'who_submits'],
+    present: ['exports_source', 'app_store_guidelines_in_play', 'price_from_usd', 'free_tier'],
+    top: {
+      // The vocabulary travels with the answer on purpose: "unknown" means unproven, not
+      // failed, and an agent that never sees the definition collapses it into "blocked".
+      required: ['total', 'verdict_vocabulary', 'browse'],
+    },
+  },
+  {
+    name: 'compare_app_builders',
+    label: 'compare_app_builders (one builder)',
+    args: { builder: 'rork' },
+    rows: (r) => r.evidence,
+    // Every claim has to carry the URL that settles it and the date it was read — a verdict
+    // repeated without them is an opinion wearing a citation's clothes.
+    required: ['supports', 'claim', 'kind', 'source', 'read_on'],
+    top: {
+      required: ['builder', 'verdict', 'why', 'report_url'],
+      present: ['detail'],
+    },
+  },
 ];
 
 function checkKeys(obj, { required = [], present = [], absent = [] }, where) {

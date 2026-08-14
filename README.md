@@ -1,6 +1,6 @@
 # kynth-mcp
 
-MCP server from [Kynth Studios](https://kynth.studio). Ten read-only lookup tools backed by live public data — no API key, no signup, nothing to sign up for.
+MCP server from [Kynth Studios](https://kynth.studio). Eleven read-only lookup tools backed by live public data — no API key, no signup, nothing to sign up for.
 
 `mcp-name: studio.kynth/kynth-mcp`
 
@@ -25,6 +25,7 @@ Most of these answer questions that a model cannot answer correctly from a train
 | `search_agent_configs(stack?, format?, tag?, …)` | Real `AGENTS.md`, `CLAUDE.md`, Cursor, Copilot, Windsurf, GEMINI.md and Cline files from public repositories, scored for quality — how well-maintained projects on a given stack actually write theirs. |
 | `search_component_registries(q, kind?, limit?)` | shadcn-compatible components, blocks and hooks across dozens of public registries, with their dependencies so you can judge the cost of pulling one in. |
 | `grade_starter_kit(q?, limit?)` | Starter kits and boilerplates, graded by installing them: what is actually wired up versus what only appears in the README. |
+| `compare_app_builders(builder?, verdict?, limit?)` | Whether the app an AI mobile-app builder hands you clears Apple App Store review — what it outputs, whether you can export the source, who submits the binary, and which guidelines are in play. Every verdict carries the source that settles it and the date it was read; an unsettled question comes back `unknown` rather than guessed. |
 
 ### Compliance
 
