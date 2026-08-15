@@ -1,6 +1,6 @@
 # Installing kynth-mcp
 
-`kynth-mcp` is ten read-only lookup tools over live public data. There is **no API key, no
+`kynth-mcp` is eleven read-only lookup tools over live public data. There is **no API key, no
 signup and no account** — configuration is the command and nothing else.
 
 Most of the tools answer questions a model cannot answer correctly from a training cutoff,
