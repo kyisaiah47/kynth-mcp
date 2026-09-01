@@ -131,12 +131,27 @@ export function registerDirectoryTools(server) {
         'result, so the answer is directly actionable.',
       inputSchema: {
         q: z.string().describe('What the skill should do, in plain words. e.g. "pdf generation", "code review", "terraform".'),
-        kind: z.string().optional().describe('Filter to one of: skill, plugin, marketplace.'),
+        // ⛔ `subagent` WAS MISSING FROM THIS LIST and it is one of the four kinds SkillWorks
+        // indexes — 112,215 listings of it. A model reads this string as the vocabulary, so an
+        // omission here is a filter nothing can ask for.
+        kind: z.string().optional().describe('Filter to one of: skill, subagent, plugin, marketplace.'),
         limit: z.number().optional().describe('How many to return, 1-10. Default 5.'),
       },
     },
     async ({ q, kind, limit }) => {
+      /* ⛔ `q` REACHED THIS ENDPOINT AND WAS DROPPED ON THE FLOOR UNTIL 2026-09-01. skillworks
+       * /api/list was written for the browse grid and never read the parameter, so every call
+       * here — for any query — came back with the same top five of the score order
+       * (skill-creator, ui-ux-pro-max, turborepo, systematic-debugging, writing-skills). It
+       * returned 200 the whole time, which is why nothing caught it. Fixed in that route; the
+       * response now echoes `q`, so the assertion below is checkable rather than assumed. */
       const d = await get(`${API.skillworks}/list?${qs({ q, kind, limit: clamp(limit) })}`);
+      if (d && d.q === null) {
+        return {
+          error: 'skillworks did not apply the query — the directory returned an unranked listing',
+          browse: `https://skillworks.kynth.studio/search?q=${encodeURIComponent(q)}`,
+        };
+      }
       return {
         query: q,
         results: (d.rows || []).map((r) => ({
@@ -148,6 +163,12 @@ export function registerDirectoryTools(server) {
           installs: r.installs,
           stars: r.stars,
           score: r.score,
+          /* How many repositories carry a listing of this name. The corpus is 697,793 listings
+           * over 304,731 distinct names because people commit their vendored .claude/skills, so
+           * this is the adoption signal that exists for every row — `installs` is present on
+           * 4,439 of them. A result carrying `copies: 840` is the canonical copy of something
+           * widely used; `copies: 1` is one person's. */
+          copies: r.copies,
           url: r.url,
         })),
         browse: 'https://skillworks.kynth.studio',
@@ -169,15 +190,34 @@ export function registerDirectoryTools(server) {
         'dependencies so you can judge the cost of pulling it in.',
       inputSchema: {
         q: z.string().describe('What the component does. e.g. "data table", "auth form", "kanban".'),
-        kind: z.string().optional().describe('Filter by item kind, e.g. "ui", "block", "hook", "lib".'),
+        /* ⛔ "ui" IS NOT A KIND AND NEVER WAS. BlockDex's kinds are the seven below; `registry:ui`
+         * is the raw registry TYPE, a different field. /api/search validates kind against its own
+         * enum and silently drops anything else rather than failing, so `kind: "ui"` did not error
+         * — it returned the whole unfiltered corpus. Measured 2026-09-01: `q=data table&kind=ui`
+         * came back `filters.kind: null` with total 487, against 241 for `kind=component`. Every
+         * filtered component search this tool ran was unfiltered and reported as filtered. */
+        kind: z
+          .string()
+          .optional()
+          .describe('Filter by item kind: component, block, hook, example, lib, theme, other.'),
+        access: z
+          .string()
+          .optional()
+          .describe('Filter by whether the item is free to install: free, paid, unknown.'),
         limit: z.number().optional().describe('How many to return, 1-10. Default 5.'),
       },
     },
-    async ({ q, kind, limit }) => {
-      const d = await get(`${API.blockdex}/search?${qs({ q, kind, limit: clamp(limit) })}`);
+    async ({ q, kind, access, limit }) => {
+      const d = await get(`${API.blockdex}/search?${qs({ q, kind, access, limit: clamp(limit) })}`);
+      /* A kind the API did not accept comes back as `filters.kind: null` over the whole corpus.
+       * Say so rather than presenting an unfiltered answer as a filtered one. */
+      const dropped = kind && d.filters && d.filters.kind === null ? kind : null;
       return {
         query: q,
         total: d.total,
+        ...(dropped
+          ? { warning: `kind "${dropped}" is not one of component, block, hook, example, lib, theme, other — these results are UNFILTERED` }
+          : {}),
         items: (d.items || []).map((i) => ({
           name: i.name,
           title: i.title,
@@ -186,6 +226,16 @@ export function registerDirectoryTools(server) {
           description: i.description,
           dependencies: i.dependencies?.slice(0, 8),
           files: i.file_count,
+          /* ⛔ THE THREE FIELDS THAT MAKE THE ANSWER ACTIONABLE, AND ALL THREE WERE DROPPED.
+           * BlockDex's own API.md says of install_cmd: "It is the single thing most visitors came
+           * for." An agent that gets a component name and no install command has to guess the
+           * registry's URL shape, which is exactly the guess this index exists to remove. And
+           * `access` is, in that document's words, the first question a person asks — `unknown`
+           * is a third answer meaning the registry serves no item endpoint we could probe, and
+           * it must never be presented as if it were free. */
+          install: i.install_cmd,
+          access: i.access,
+          docs: i.docs_url || i.preview_url || null,
         })),
         browse: 'https://blockdex.kynth.studio',
       };
