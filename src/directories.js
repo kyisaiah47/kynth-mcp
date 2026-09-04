@@ -52,6 +52,26 @@ const qs = (o) =>
 const clamp = (n) => Math.min(Math.max(Number(n) || 5, 1), MAX_ROWS);
 
 /**
+ * ⛔ ANNOTATIONS ARE NOT OPTIONAL, AND THEY BELONG HERE RATHER THAN ON EACH TOOL.
+ *
+ * Anthropic's connector review criteria: "Every tool must include a `title` and the applicable
+ * hint" and missing annotations are the single largest cause of rejection. Every tool this
+ * package ships is an unauthenticated GET against a public endpoint: it reads, it never writes,
+ * it never deletes, and calling it twice returns the same answer. So the hints are the same for
+ * all eleven, and stamping them in the shared registrar means a tool added next month gets them
+ * by being registered the normal way, instead of by somebody remembering a line. `title` is
+ * lifted off the config that already carries it, so the two can never disagree.
+ *
+ * `openWorldHint: true` because the answer comes from a live upstream, not from a closed set.
+ */
+const READ_ONLY = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: true,
+};
+
+/**
  * Register a tool whose handler returns a plain object.
  *
  * Every tool returns both `content` (the text an older client reads) and `structuredContent`
@@ -60,8 +80,8 @@ const clamp = (n) => Math.min(Math.max(Number(n) || 5, 1), MAX_ROWS);
  * that returns `{ error }` lets it try something else, which for a directory lookup is almost
  * always the right outcome.
  */
-function tool(server, name, config, handler) {
-  server.registerTool(name, config, async (args) => {
+export function tool(server, name, config, handler) {
+  server.registerTool(name, { ...config, annotations: { title: config.title, ...READ_ONLY, ...config.annotations } }, async (args) => {
     let result;
     try {
       result = await handler(args);

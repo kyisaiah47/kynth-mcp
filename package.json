@@ -1,8 +1,8 @@
 {
   "name": "kynth-mcp",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "mcpName": "studio.kynth/kynth-mcp",
-  "description": "MCP server from Kynth Studios — eleven read-only lookups over live public data: agent skills and configs, shadcn component registries, AI model pricing and routing, dependency maintenance status, SaaS pricing and stack cost estimates, AI app-builder App Store readiness, ADA Title II accessibility reports, and nonprofit good-standing checks. No key, no signup.",
+  "description": "MCP server from Kynth Studios \u2014 eleven read-only lookups over live public data: agent skills and configs, shadcn component registries, AI model pricing and routing, dependency maintenance status, SaaS pricing and stack cost estimates, AI app-builder App Store readiness, ADA Title II accessibility reports, and nonprofit good-standing checks. No key, no signup.",
   "type": "module",
   "license": "MIT",
   "author": "Kynth Studios <hello@kynth.studio>",

@@ -15,9 +15,21 @@
 // No credentials required. Read-only. Every request goes to public endpoints that
 // serve the same data as the products' own web pages.
 
+import { readFileSync } from 'node:fs';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { registerDirectoryTools } from './directories.js';
+import { registerDirectoryTools, tool } from './directories.js';
+
+/* ⛔ THE VERSION A CLIENT READS IS package.json, NEVER A TYPED LITERAL.
+ *
+ * `buildServer` announced 0.2.0 in `initialize` while package.json, server.json, npm and the
+ * official MCP registry all said 0.3.0. Three of those four are compared every six hours by
+ * kynth-ops/portals/mcpdir/tick.mjs; the one number an MCP client actually asks the server for
+ * was the one nothing checked, and it had been a minor version behind since 2026-08-13. A
+ * literal is a promise to remember. Reading the manifest is the manifest. */
+const PKG = JSON.parse(
+  readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+);
 
 const CB_SITE = 'https://civicbinder.org';
 const SB_URL = 'https://xowekqdsttxwbhfxvusa.supabase.co';
@@ -176,10 +188,11 @@ async function lookupNonprofitStatus(rawEin) {
 export function buildServer() {
   const server = new McpServer({
     name: 'kynth-mcp',
-    version: '0.2.0',
+    version: PKG.version,
   });
 
-  server.registerTool(
+  tool(
+    server,
     'lookup_ada_report',
     {
       title: 'Look up an ADA Title II website accessibility report',
@@ -196,16 +209,11 @@ export function buildServer() {
           .describe('The .gov domain to look up, e.g. "denvergov.org" or "cityofmadison.com". Protocol and paths are stripped automatically.'),
       },
     },
-    async ({ domain }) => {
-      const result = await lookupAdaReport(domain);
-      return {
-        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
-        structuredContent: result,
-      };
-    },
+    ({ domain }) => lookupAdaReport(domain),
   );
 
-  server.registerTool(
+  tool(
+    server,
     'lookup_nonprofit_status',
     {
       title: 'Look up nonprofit IRS / California good standing by EIN',
@@ -222,13 +230,7 @@ export function buildServer() {
           .describe('The organization\'s 9-digit EIN, with or without a dash, e.g. "12-3456789".'),
       },
     },
-    async ({ ein }) => {
-      const result = await lookupNonprofitStatus(ein);
-      return {
-        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
-        structuredContent: result,
-      };
-    },
+    ({ ein }) => lookupNonprofitStatus(ein),
   );
 
   // The seven directory lookups. The two tools above answer a compliance question someone
