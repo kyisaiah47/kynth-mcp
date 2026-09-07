@@ -7,6 +7,10 @@
   "license": "MIT",
   "author": "Kynth Studios <hello@kynth.studio>",
   "homepage": "https://kynth.studio",
+  "funding": {
+    "type": "individual",
+    "url": "https://buymeacoffee.com/kyisaiah47"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kyisaiah47/kynth-mcp.git"
