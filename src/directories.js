@@ -13,14 +13,14 @@
 import { z } from 'zod';
 
 const API = {
-  rulestack: 'https://rulestack.kynth.studio/api',
-  skillworks: 'https://skillworks.kynth.studio/api',
-  blockdex: 'https://blockdex.kynth.studio/api',
-  tooldrift: 'https://tooldrift.kynth.studio/api',
-  stillshipping: 'https://stillshipping.kynth.studio/api',
-  kitgrade: 'https://kitgrade.kynth.studio/api',
-  stacktab: 'https://stacktab.kynth.studio/api',
-  storeready: 'https://storeready.kynth.studio/api',
+  rulestack: 'https://rulestack.thecompound.tech/api',
+  skillworks: 'https://skillworks.thecompound.tech/api',
+  blockdex: 'https://blockdex.thecompound.tech/api',
+  tooldrift: 'https://tooldrift.thecompound.tech/api',
+  stillshipping: 'https://stillshipping.thecompound.tech/api',
+  kitgrade: 'https://kitgrade.thecompound.tech/api',
+  stacktab: 'https://stacktab.thecompound.tech/api',
+  storeready: 'https://storeready.thecompound.tech/api',
 };
 
 /** Cap on rows returned to a caller. Above this the answer stops being an answer. */
@@ -132,7 +132,7 @@ export function registerDirectoryTools(server) {
           stacks: c.stacks?.slice(0, 8),
           commands: c.commands?.slice(0, 6),
         })),
-        browse: 'https://rulestack.kynth.studio/configs',
+        browse: 'https://rulestack.thecompound.tech/configs',
       };
     },
   );
@@ -169,7 +169,7 @@ export function registerDirectoryTools(server) {
       if (d && d.q === null) {
         return {
           error: 'skillworks did not apply the query — the directory returned an unranked listing',
-          browse: `https://skillworks.kynth.studio/search?q=${encodeURIComponent(q)}`,
+          browse: `https://skillworks.thecompound.tech/search?q=${encodeURIComponent(q)}`,
         };
       }
       return {
@@ -191,7 +191,7 @@ export function registerDirectoryTools(server) {
           copies: r.copies,
           url: r.url,
         })),
-        browse: 'https://skillworks.kynth.studio',
+        browse: 'https://skillworks.thecompound.tech',
       };
     },
   );
@@ -257,7 +257,7 @@ export function registerDirectoryTools(server) {
           access: i.access,
           docs: i.docs_url || i.preview_url || null,
         })),
-        browse: 'https://blockdex.kynth.studio',
+        browse: 'https://blockdex.thecompound.tech',
       };
     },
   );
@@ -290,7 +290,7 @@ export function registerDirectoryTools(server) {
       const want = (board || 'overall/all').toLowerCase();
       const boards = d.boards || [];
       const picked = boards.find((b) => `${b.scope}/${b.scope_key}`.toLowerCase() === want) || boards[0];
-      if (!picked) return { error: 'leaderboard returned no boards', browse: 'https://tooldrift.kynth.studio' };
+      if (!picked) return { error: 'leaderboard returned no boards', browse: 'https://tooldrift.thecompound.tech' };
       /* ⛔ THE WHOLE METHOD DOCUMENT WAS RETURNED ON EVERY CALL. Measured live 2026-08-13:
        * `d.method` is a 1,324-byte constant — seven prose fields including the full weighting
        * formula and the per-tool board list — and it was spent on every single invocation of this
@@ -307,7 +307,7 @@ export function registerDirectoryTools(server) {
         method_summary: m
           ? `Ranks ${m.measures}. Does not measure ${m.does_not_measure} ${m.price_basis}`
           : null,
-        method_url: 'https://tooldrift.kynth.studio/method',
+        method_url: 'https://tooldrift.thecompound.tech/method',
         available_boards: boards.map((b) => `${b.scope}/${b.scope_key}`),
         models: (picked.rows || []).slice(0, clamp(limit)).map((m) => ({
           rank: m.rank,
@@ -319,7 +319,7 @@ export function registerDirectoryTools(server) {
           // because "ranked #1" read without it is a much stronger claim than the data supports.
           rationale: m.rationale,
         })),
-        browse: 'https://tooldrift.kynth.studio',
+        browse: 'https://tooldrift.thecompound.tech',
       };
     },
   );
@@ -358,7 +358,7 @@ export function registerDirectoryTools(server) {
           stars: t.stars,
           url: t.homepage || (t.repo_full_name ? `https://github.com/${t.repo_full_name}` : null),
         })),
-        browse: 'https://stillshipping.kynth.studio',
+        browse: 'https://stillshipping.thecompound.tech',
       };
     },
   );
@@ -415,7 +415,7 @@ export function registerDirectoryTools(server) {
           price: k.price_label,
           url: k.homepage || (k.repo ? `https://github.com/${k.repo}` : null),
         })),
-        browse: 'https://kitgrade.kynth.studio',
+        browse: 'https://kitgrade.thecompound.tech',
       };
     },
   );
@@ -472,7 +472,7 @@ export function registerDirectoryTools(server) {
             verified_at: p.verified_at,
           })),
         })),
-        browse: 'https://stacktab.kynth.studio',
+        browse: 'https://stacktab.thecompound.tech',
       };
     },
   );
@@ -494,7 +494,7 @@ export function registerDirectoryTools(server) {
     },
     async ({ stack, users }) => {
       const d = await get(`${API.stacktab}/estimate?${qs({ stack, users })}`);
-      if (d.error) return { error: d.error, browse: 'https://stacktab.kynth.studio' };
+      if (d.error) return { error: d.error, browse: 'https://stacktab.thecompound.tech' };
       const picks = d.at?.picks || [];
       /* ⛔ THIS RECOMPUTED A TOTAL THE API HAD DELIBERATELY REFUSED TO GIVE.
        *
@@ -531,7 +531,7 @@ export function registerDirectoryTools(server) {
           monthly_usd: p.total,
           lines: (p.lines || []).map((l) => ({ label: l.label, detail: l.detail, usd: l.amount })),
         })),
-        browse: 'https://stacktab.kynth.studio',
+        browse: 'https://stacktab.thecompound.tech',
       };
     },
   );
@@ -612,7 +612,7 @@ export function registerDirectoryTools(server) {
             read_on: e.source_date,
             link_status: e.link_status,
           })),
-          report_url: `https://storeready.kynth.studio/builder/${d.builder.slug}`,
+          report_url: `https://storeready.thecompound.tech/builder/${d.builder.slug}`,
         };
       }
 
@@ -631,7 +631,7 @@ export function registerDirectoryTools(server) {
           unknown: 'No source found that settles it. Unproven, not failed.',
         },
         builders: rows.slice(0, clamp(limit ?? MAX_ROWS)).map(row),
-        browse: 'https://storeready.kynth.studio',
+        browse: 'https://storeready.thecompound.tech',
       };
     },
   );

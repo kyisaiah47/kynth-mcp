@@ -1,6 +1,6 @@
 # kynth-mcp
 
-MCP server from [Kynth Studios](https://kynth.studio). Eleven read-only lookup tools backed by live public data — no API key, no signup, nothing to sign up for.
+MCP server from [Compound Labs](https://thecompound.tech). Eleven read-only lookup tools backed by live public data — no API key, no signup, nothing to sign up for.
 
 `mcp-name: studio.kynth/kynth-mcp`
 
@@ -115,4 +115,4 @@ Add to `claude_desktop_config.json` (Settings → Developer → Edit Config):
 
 ## License
 
-MIT © Kynth Studios
+MIT © Compound Labs
