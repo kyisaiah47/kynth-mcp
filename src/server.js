@@ -35,7 +35,7 @@ const CB_SITE = 'https://civicbinder.org';
 const SB_URL = 'https://xowekqdsttxwbhfxvusa.supabase.co';
 // Supabase publishable key — designed to ship in public clients; RLS scopes reads.
 const SB_KEY = 'sb_publishable_9GvEPSkV3gyuyN02ZZJcig_gWo1j9LK';
-const GS_API = 'https://goodstanding.kynth.studio/api/lookup';
+const GS_API = 'https://goodstanding.thecompound.tech/api/lookup';
 
 const ADA_COLUMNS = [
   'domain', 'entity_name', 'entity_type', 'state', 'city', 'population', 'deadline',
@@ -173,14 +173,14 @@ async function lookupNonprofitStatus(rawEin) {
         `EIN ${digits} does not appear on the IRS auto-revocation list or the ` +
         `California registry delinquency/suspension lists that GoodStanding tracks. ` +
         `On those lists, this organization reads as in good standing. ` +
-        `Full check: https://goodstanding.kynth.studio/#lookup`,
+        `Full check: https://goodstanding.thecompound.tech/#lookup`,
     };
   }
   return {
     ein: digits,
     clear: false,
     results: data.results,
-    lookup_url: 'https://goodstanding.kynth.studio/#lookup',
+    lookup_url: 'https://goodstanding.thecompound.tech/#lookup',
   };
 }
 

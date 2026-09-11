@@ -37,7 +37,7 @@ Returns the grade, violation counts (total / serious / critical), the top failin
 
 ### `lookup_nonprofit_status(ein)`
 
-Checks a nonprofit's EIN against the IRS auto-revocation list and the California Registry of Charities delinquency/suspension lists, via [GoodStanding](https://goodstanding.kynth.studio). Returns revocation and reinstatement dates, whether the streamlined 15-month reinstatement window is still open, and whether AB 488 requires charitable fundraising platforms to block the organization's donation pages. A `clear: true` result means the EIN is on none of the tracked lists.
+Checks a nonprofit's EIN against the IRS auto-revocation list and the California Registry of Charities delinquency/suspension lists, via [GoodStanding](https://goodstanding.thecompound.tech). Returns revocation and reinstatement dates, whether the streamlined 15-month reinstatement window is still open, and whether AB 488 requires charitable fundraising platforms to block the organization's donation pages. A `clear: true` result means the EIN is on none of the tracked lists.
 
 ## Install
 
