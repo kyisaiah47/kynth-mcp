@@ -25,7 +25,7 @@ still maintained, what a service's published price is this week.
 - **Claude Desktop**: same JSON in `claude_desktop_config.json` (Settings → Developer → Edit Config).
 - **Cursor / VS Code / Windsurf**: same JSON under their MCP settings.
 
-The server is also published in the official MCP registry as `studio.kynth/kynth-mcp`.
+The server is also published in the official MCP registry as `studio.compound/kynth-mcp`.
 
 ## Verify the install
 

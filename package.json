@@ -1,7 +1,7 @@
 {
   "name": "kynth-mcp",
   "version": "0.4.0",
-  "mcpName": "studio.kynth/kynth-mcp",
+  "mcpName": "studio.compound/kynth-mcp",
   "description": "MCP server from Compound Labs \u2014 eleven read-only lookups over live public data: agent skills and configs, shadcn component registries, AI model pricing and routing, dependency maintenance status, SaaS pricing and stack cost estimates, AI app-builder App Store readiness, ADA Title II accessibility reports, and nonprofit good-standing checks. No key, no signup.",
   "type": "module",
   "license": "MIT",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kyisaiah47/kynth-mcp.git"
+    "url": "git+https://github.com/kyisaiah47/compound-mcp.git"
   },
   "keywords": [
     "mcp",

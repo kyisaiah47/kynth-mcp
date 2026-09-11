@@ -1,9 +1,9 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "studio.kynth/kynth-mcp",
+  "name": "studio.compound/kynth-mcp",
   "description": "Eleven keyless lookups: model pricing, dep health, stack cost, registries, App Store readiness.",
   "version": "0.4.0",
-  "websiteUrl": "https://github.com/kyisaiah47/kynth-mcp",
+  "websiteUrl": "https://github.com/kyisaiah47/compound-mcp",
   "packages": [
     {
       "registryType": "npm",

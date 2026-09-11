@@ -2,7 +2,7 @@
 
 MCP server from [Compound Labs](https://thecompound.tech). Eleven read-only lookup tools backed by live public data — no API key, no signup, nothing to sign up for.
 
-`mcp-name: studio.kynth/kynth-mcp`
+`mcp-name: studio.compound/kynth-mcp`
 
 Most of these answer questions that a model cannot answer correctly from a training cutoff, because the underlying fact changed after it: what a model costs today, whether a library is still maintained, whether someone has already published the skill you are about to write.
 

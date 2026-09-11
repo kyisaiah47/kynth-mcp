@@ -9,7 +9,7 @@
 // On 2026-08-13 this package was serving, simultaneously:
 //
 //   npm         kynth-mcp@0.2.0, published 2026-08-06, containing the PRE-FIX code
-//   MCP registry studio.kynth/kynth-mcp@0.1.2, describing a two-tool compliance server
+//   MCP registry studio.compound/kynth-mcp@0.1.2, describing a two-tool compliance server
 //   this repo    server.json at 0.2.0, ten tools, never published anywhere
 //
 // Three different answers to "what is this server", none of them agreeing, and nothing anywhere

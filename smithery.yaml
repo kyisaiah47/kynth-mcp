@@ -1,7 +1,7 @@
 # Smithery server manifest. https://smithery.ai
 #
 # Added 2026-08-20. kynth-mcp was already published to the OFFICIAL MCP registry as
-# studio.kynth/kynth-mcp (v0.3.0 live there, verified) and carries glama.json for Glama, but it
+# studio.compound/kynth-mcp (v0.3.0 live there, verified) and carries glama.json for Glama, but it
 # was returning 404 on both smithery.ai and mcp.so. Smithery indexes a GitHub repo when this file
 # is present, so its absence was the whole reason.
 #

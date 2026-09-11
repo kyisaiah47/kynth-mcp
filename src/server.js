@@ -24,7 +24,7 @@ import { registerDirectoryTools, tool } from './directories.js';
  *
  * `buildServer` announced 0.2.0 in `initialize` while package.json, server.json, npm and the
  * official MCP registry all said 0.3.0. Three of those four are compared every six hours by
- * kynth-ops/portals/mcpdir/tick.mjs; the one number an MCP client actually asks the server for
+ * compound-ops/portals/mcpdir/tick.mjs; the one number an MCP client actually asks the server for
  * was the one nothing checked, and it had been a minor version behind since 2026-08-13. A
  * literal is a promise to remember. Reading the manifest is the manifest. */
 const PKG = JSON.parse(
